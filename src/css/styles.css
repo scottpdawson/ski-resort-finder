@@ -1,0 +1,249 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+}
+
+.input-range__label--max,
+.input-range__label--min {
+  display: none;
+}
+
+.leaflet-top {
+  top: unset !important;
+  bottom: 45px;
+}
+
+.input-range__track.input-range__track--background {
+  background-color: black;
+}
+
+.input-range__track.input-range__track--active {
+  background-color: #dedede;
+}
+
+.input-range__slider {
+  background-color: #dedede !important;
+}
+
+.input-range__label-container {
+  background-color: #00000066;
+  border-radius: 10px;
+  padding: 2px 8px;
+}
+
+.controlContainer {
+  width: 100%;
+  position: relative;
+  height: 100vh;
+}
+.skiHed {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  background-color: #000000aa;
+  border-bottom: 3px solid #00000099;
+  height: 50px;
+  z-index: 999;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-evenly;
+
+}
+.skiHed div {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+  color: white;
+}
+.author {
+  position: absolute;
+  right: 20px;
+  bottom: 50px;
+  z-index: 1001;
+}
+
+.author img {
+  height: 44px;
+  border-radius: 50px;
+  border: 2px solid white;
+}
+
+.vertSlider {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 50px;
+  width: 60vw;
+  z-index: 1001;
+  margin: 0 auto;
+  background-color: #00000066;
+  padding: 30px 20px 10px;
+  border-radius: 7px;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-around;
+}
+.vertSliderMeta {
+  margin: -20px 20px 0px 0px;
+  width: 120px;
+}
+.vertSliderMeta p {
+  color: #999;
+  font-size: .8em;
+  margin: 0px 0px 1px 0px;
+}
+.vertSliderControl {
+  width: 100%;
+}
+
+img.passType {
+  height: 30px;
+  margin: 10px 10px;
+  filter: brightness(.35);
+}
+
+img.passType.active {
+  filter: none;
+}
+
+img.passType:hover {
+  cursor: pointer;
+}
+
+.resortNameSearch {
+  background: #333;
+  border: 0;
+  font-size: 1.2em;
+  text-align: center;
+  height: 2em;
+  border-radius: 20px;
+  margin-top: 6px;
+  padding: 0px 20px;
+  color: white;
+}
+
+.resortCount {
+  font-size: .85em;
+  text-align: center;
+  display: block;
+  background-color: #00000066;
+  border-bottom-right-radius: 10px;
+  padding: 10px;
+  border-bottom-left-radius: 10px;
+  margin-top: 9px;
+}
+
+.resortCount button {
+  margin-left: 10px;
+}
+
+.resortCard {
+  width: 300px;
+}
+
+.resortCard table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.resortCard table thead th {
+  border-bottom: 1px solid #ccc;
+}
+
+.ctr {
+  text-align: center;
+}
+
+.black-diamond {
+  -o-transform: rotate(45deg);
+  -webkit-transform: rotate(45deg);
+  transform: rotate(45deg);
+  width: 0.8em !important;
+  color: black;
+}
+
+.flex-container {
+  display: flex;
+  margin: 10px -5px;
+  min-height: 140px;
+}
+.flex-container .column {
+  padding: 7px;
+  flex: 1;
+  overflow: hidden;
+  border: 1px solid #dedede;
+  border-radius: 5px;
+  margin: 0 5px;
+  position: relative;
+}
+.popover-icon {
+  position: absolute;
+  opacity: .15;
+}
+.popover-icon.tram {
+  right: -50px;
+  bottom: 10px;
+}
+.popover-icon.mountain {
+  right: -57px;
+  bottom: -10px;
+}
+.popover-icon.skiing {
+  right: -20px;
+  bottom: 6px;
+}
+.popover-suffix {
+  opacity: .7;
+  text-transform: uppercase;
+  font-size: .85em;
+  display: block;
+}
+.popover-suffix-up {
+  margin-top: -5px;
+}
+.popover-stat {
+  display: block;
+  font-size: 2em;
+  font-weight: bold;
+}
+.popover-substat {
+  font-size: 1.1em;
+}
+.lift-metric {
+  display: block;
+}
+.vertical-top-bottom {
+  position: absolute;
+  bottom: 10px;
+}
+.stat-pct {
+  font-size: .9em;
+  opacity: .9;
+  display: block;
+}
+
+textarea, select, input, button { outline: none; }
+
+.mobile-only { display: none; }
+
+@media only screen and (max-width: 800px) {
+  .mobile-only { display: inline-block; }
+  img.passType { display: none; }
+  select, button { color: white; }
+  .author {
+    position: absolute;
+    right: 10px;
+    top: 60px;
+    z-index: 1001;
+  }
+}
