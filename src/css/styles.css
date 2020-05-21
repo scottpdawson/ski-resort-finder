@@ -17,6 +17,10 @@ code {
   display: none;
 }
 
+.leaflet-container {
+  background: #262626 !important;
+}
+
 .leaflet-top {
   top: unset !important;
   bottom: 45px;
