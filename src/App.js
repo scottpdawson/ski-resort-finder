@@ -28,7 +28,7 @@ class App extends Component {
   async componentDidMount() {
     // trigger data load from openskimap
     axios
-      .get(`http://tiles.skimap.org/geojson/ski_areas.geojson`)
+      .get(`//tiles.skimap.org/geojson/ski_areas.geojson`)
       .then((res) => {
         const resorts =
           res.data.features.map((resort) => ({
