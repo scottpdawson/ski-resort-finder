@@ -1,10 +1,11 @@
 import React, { Component } from "react";
 import { 
-  Map, 
+  MapContainer, 
   TileLayer, 
   CircleMarker, 
   Popup 
 } from "react-leaflet";
+import MarkerClusterGroup from 'react-leaflet-markercluster';
 import {
   attribution,
   tileUrl,
@@ -13,12 +14,13 @@ import {
 } from './utils/SkiMapUtils';
 import SkiMapTooltip from './SkiMapTooltip';
 import "leaflet/dist/leaflet.css";
+import "react-leaflet-markercluster/dist/styles.min.css";
 
 export default class SkiMap extends Component {
     state = defaultMapState;
     render() {
         return this.props.resorts ? (
-        <Map
+        <MapContainer
             center={[this.state.lat, this.state.lng]}
             zoom={this.state.zoom}
             style={{ width: "100%", position: "absolute", top: 0, bottom: 0, zIndex: 500, }}
@@ -31,6 +33,7 @@ export default class SkiMap extends Component {
                 attribution={attribution}
                 url={tileUrl}
             />
+            <MarkerClusterGroup>
             {this.props.resorts.map((resort, idx) => 
                 <CircleMarker 
                     key={`resort-${resort.id}`}
@@ -38,12 +41,15 @@ export default class SkiMap extends Component {
                     opacity={1}
                     radius={5}
                     weight={1}
-                    onClick={() => { 
-                        this.setState({ activeResort: resort });
+                    eventHandlers={{
+                        click: () => {
+                            this.setState({ activeResort: resort });
+                        },
                     }}
                     center={resort.point}>
                 </CircleMarker>
             )}
+            </MarkerClusterGroup>
             {this.state.activeResort && <Popup
                 position={this.state.activeResort.point}
                 onClose={() => {
@@ -55,7 +61,7 @@ export default class SkiMap extends Component {
                     verticalUnits={this.props.verticalUnits}
                 />
             </Popup>}
-        </Map>
+        </MapContainer>
         ) : (
             "Data is loading..."
         );
