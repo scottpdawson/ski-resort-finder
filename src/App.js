@@ -7,12 +7,12 @@ import {
   getTotal,
   getPointForResort,
 } from "./components/utils/AppUtils";
-import { numberFormat } from './components/utils/Format';
+import { numberFormat } from "./components/utils/Format";
 import "leaflet/dist/leaflet.css";
 import "react-input-range/lib/css/index.css";
 import firebase from "./firebase/firebase.js";
 import { DebounceInput } from "react-debounce-input";
-import debounce from 'lodash/debounce'
+import debounce from "lodash/debounce";
 
 class App extends Component {
   state = {
@@ -27,109 +27,101 @@ class App extends Component {
 
   async componentDidMount() {
     // trigger data load from openskimap
-    axios
-      .get(`//tiles.skimap.org/geojson/ski_areas.geojson`)
-      .then((res) => {
-        const resorts =
-          res.data.features.map((resort) => ({
-            id: resort.properties.id,
-            point: getPointForResort(resort),
-            name: resort.properties.name,
-            website: resort.properties.website,
-            lifts: getTotal(resort.properties.statistics.lifts.byType, "count"),
-            runs: resort.properties.statistics.runs.byActivity.downhill
-              ? getTotal(
-                  resort.properties.statistics.runs.byActivity.downhill
-                    .byDifficulty,
-                  "count"
-                )
-              : null,
-            totalRunKm: resort.properties.statistics.runs.byActivity.downhill
-              ? getTotal(
-                  resort.properties.statistics.runs.byActivity.downhill
-                    .byDifficulty,
-                  "lengthInKm"
-                )
-              : null,
-            liftDetails: resort.properties.statistics.lifts.byType,
-            runDetails: resort.properties.statistics.runs.byActivity.downhill,
-            top: resort.properties.statistics.maxElevation,
-            bottom: resort.properties.statistics.minElevation,
-            vertical:
-              resort.properties.statistics.maxElevation &&
-              resort.properties.statistics.minElevation
-                ? resort.properties.statistics.maxElevation -
-                  resort.properties.statistics.minElevation
-                : "",
-            isOperating:
-              resort.properties.status === "operating" ? true : false,
-            isDownhill: resort.properties.activities.indexOf("downhill") > -1,
-            isEpic: false,
-            isIkon: false,
-          })) || [];
+    axios.get(`/ski_areas.geojson`).then((res) => {
+      const resorts =
+        res.data.features.map((resort) => ({
+          id: resort.properties.id,
+          point: getPointForResort(resort),
+          name: resort.properties.name,
+          website: resort.properties.website,
+          lifts: getTotal(resort.properties.statistics.lifts.byType, "count"),
+          runs: resort.properties.statistics.runs.byActivity.downhill
+            ? getTotal(
+                resort.properties.statistics.runs.byActivity.downhill
+                  .byDifficulty,
+                "count"
+              )
+            : null,
+          totalRunKm: resort.properties.statistics.runs.byActivity.downhill
+            ? getTotal(
+                resort.properties.statistics.runs.byActivity.downhill
+                  .byDifficulty,
+                "lengthInKm"
+              )
+            : null,
+          liftDetails: resort.properties.statistics.lifts.byType,
+          runDetails: resort.properties.statistics.runs.byActivity.downhill,
+          top: resort.properties.statistics.maxElevation,
+          bottom: resort.properties.statistics.minElevation,
+          vertical:
+            resort.properties.statistics.maxElevation &&
+            resort.properties.statistics.minElevation
+              ? resort.properties.statistics.maxElevation -
+                resort.properties.statistics.minElevation
+              : "",
+          isOperating: resort.properties.status === "operating" ? true : false,
+          isDownhill: resort.properties.activities.indexOf("downhill") > -1,
+          isEpic: false,
+          isIkon: false,
+        })) || [];
 
-        // include resort only if it's active, downhill, has a name and coordintes, and has some vertical
-        const operatingDownhillResorts = resorts.filter(
-          (resort) =>
-            resort.isOperating &&
-            resort.isDownhill &&
-            resort.point &&
-            resort.name &&
-            resort.vertical
-        );
+      // include resort only if it's active, downhill, has a name and coordintes, and has some vertical
+      const operatingDownhillResorts = resorts.filter(
+        (resort) =>
+          resort.isOperating &&
+          resort.isDownhill &&
+          resort.point &&
+          resort.name &&
+          resort.vertical
+      );
 
-        // calculate max vertical for slider operation
-        const maxVertical = Math.max.apply(
-          Math,
-          operatingDownhillResorts.map(function (resort) {
-            return resort.vertical;
-          })
-        );
+      // calculate max vertical for slider operation
+      const maxVertical = Math.max.apply(
+        Math,
+        operatingDownhillResorts.map(function (resort) {
+          return resort.vertical;
+        })
+      );
+
+      this.setState({
+        maxVertical: maxVertical,
+        verticalFilter: {
+          min: 0,
+          max: maxVertical,
+        },
+      });
+
+      // trigger data load from Firebase to get Epic/Ikon data
+      const ikonEpicFlags = firebase.database().ref();
+      ikonEpicFlags.on("value", (snapshot) => {
+        let epicIkon = snapshot.val();
+        let currentResorts = operatingDownhillResorts;
+        epicIkon.forEach(function (epicIkonResort) {
+          // find resort ID within currentResorts
+          let matchedResort = currentResorts.find(
+            (o) => o.name === epicIkonResort.name
+          );
+
+          // set isIkon and isEpic within currentResorts
+          if (matchedResort) {
+            matchedResort.isEpic = epicIkonResort.epic === 1 ? true : false;
+            matchedResort.isIkon = epicIkonResort.ikon === 1 ? true : false;
+          } else {
+            console.log("couldn't find", epicIkonResort.name);
+          }
+        });
 
         this.setState({
-          maxVertical: maxVertical,
-          verticalFilter: {
-            min: 0,
-            max: maxVertical,
-          },
-        });
-
-        // trigger data load from Firebase to get Epic/Ikon data
-        const ikonEpicFlags = firebase.database().ref();
-        ikonEpicFlags.on("value", (snapshot) => {
-          let epicIkon = snapshot.val();
-          let currentResorts = operatingDownhillResorts;
-          epicIkon.forEach(function (epicIkonResort) {
-            // find resort ID within currentResorts
-            let matchedResort = currentResorts.find(
-              (o) => o.name === epicIkonResort.name
-            );
-
-            // set isIkon and isEpic within currentResorts
-            if (matchedResort) {
-              matchedResort.isEpic = epicIkonResort.epic === 1 ? true : false;
-              matchedResort.isIkon = epicIkonResort.ikon === 1 ? true : false;
-            } else {
-              console.log("couldn't find", epicIkonResort.name);
-            }
-          });
-
-          this.setState({
-            resorts: currentResorts,
-            filteredResorts: currentResorts,
-          });
+          resorts: currentResorts,
+          filteredResorts: currentResorts,
         });
       });
+    });
   }
 
   updateActiveResortList = () => {
-    let {
-      verticalFilter,
-      maxVertical,
-      searchTerm,
-      passFilter,
-      verticalUnits,
-    } = this.state;
+    let { verticalFilter, maxVertical, searchTerm, passFilter, verticalUnits } =
+      this.state;
     let filteredResorts = this.state.resorts.filter(function (resort) {
       return shouldShowResort(
         resort,
@@ -146,29 +138,38 @@ class App extends Component {
   };
 
   showAllResorts = () => {
-    this.setState({
-      searchTerm: "",
-      verticalFilter: { min: 0, max: this.state.maxVertical },
-      passFilter: "all",
-    }, () => {
-      this.updateActiveResortList();
-    });
+    this.setState(
+      {
+        searchTerm: "",
+        verticalFilter: { min: 0, max: this.state.maxVertical },
+        passFilter: "all",
+      },
+      () => {
+        this.updateActiveResortList();
+      }
+    );
   };
 
   updateSearchTerm = (s) => {
-    this.setState({
-      searchTerm: s,
-    }, () => {
-      this.updateActiveResortList();
-    });
+    this.setState(
+      {
+        searchTerm: s,
+      },
+      () => {
+        this.updateActiveResortList();
+      }
+    );
   };
 
   setPassType = (passType) => {
-    this.setState({
-      passFilter: passType,
-    }, () => {
-      this.updateActiveResortList();
-    });
+    this.setState(
+      {
+        passFilter: passType,
+      },
+      () => {
+        this.updateActiveResortList();
+      }
+    );
   };
 
   render() {
@@ -218,7 +219,7 @@ class App extends Component {
                 name="passFilter"
                 value={this.state.passFilter}
                 onChange={(passFilter) => {
-                  this.setState({ passFilter })
+                  this.setState({ passFilter });
                 }}
               >
                 <option value="all">Show All</option>
@@ -270,7 +271,9 @@ class App extends Component {
               <select
                 name="verticalUnits"
                 value={this.state.verticalUnits}
-                onChange={(e) => this.setState({ [e.target.name]: e.target.value })}
+                onChange={(e) =>
+                  this.setState({ [e.target.name]: e.target.value })
+                }
               >
                 <option value="metric">m/km</option>
                 <option value="imperial">ft/mi</option>
@@ -292,8 +295,12 @@ class App extends Component {
                 step={100}
                 value={this.state.verticalFilter}
                 onChange={debounce((verticalFilter) => {
-                  verticalFilter.min = verticalFilter.min >= 0 ? verticalFilter.min : 0;
-                  verticalFilter.max = verticalFilter.max <= this.state.maxVertical ? verticalFilter.max : this.state.maxVertical;
+                  verticalFilter.min =
+                    verticalFilter.min >= 0 ? verticalFilter.min : 0;
+                  verticalFilter.max =
+                    verticalFilter.max <= this.state.maxVertical
+                      ? verticalFilter.max
+                      : this.state.maxVertical;
                   this.setState({ verticalFilter });
                 }, 16)}
                 onChangeComplete={this.updateActiveResortList}
